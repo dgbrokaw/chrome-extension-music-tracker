@@ -7,6 +7,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	// the page contains all the information relevant to our purposes.  Once the title
 	// has been loaded, we can try to find other properties of the video.
 	if (changeInfo.title) {
+		console.log('sending message', Date.now());
 		chrome.tabs.sendMessage(tabId, { url: tab.url, title: changeInfo.title }, function(response) {
 			console.log(response);
 		});
