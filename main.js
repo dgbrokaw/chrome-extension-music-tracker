@@ -1,14 +1,8 @@
 console.log('Here I am, the content script!');
 
-var first_load = true;
-
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	console.log('first load?', first_load, 'status', request.status);
-	if (first_load && request.status === 'complete' ||
-		  !first_load && request.status !== 'complete') {
-		first_load = false;
-		setTimeout(getVideoInformation, 100);
-	}
+	console.log('message received in content script:', request);
+	setTimeout(getVideoInformation, 1000);
 	sendResponse({ message_received: true });
 });
 

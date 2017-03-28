@@ -2,13 +2,13 @@ console.log('Here I am, the background script.');
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	console.log(changeInfo);
-	if (isYoutubeURL(tab.url) && (changeInfo.status === 'complete' || changeInfo.title)) {
-		chrome.tabs.sendMessage(tabId, { url: tab.url, status: changeInfo.status || changeInfo.title }, function(response) {
+	// There are many "update" events on a single navigation to a youtube watch page.
+	// Many of those events contain the "complete" property, but this does not mean
+	// the page contains all the information relevant to our purposes.  Once the title
+	// has been loaded, we can try to find other properties of the video.
+	if (changeInfo.title) {
+		chrome.tabs.sendMessage(tabId, { url: tab.url, title: changeInfo.title }, function(response) {
 			console.log(response);
 		});
 	}
 });
-
-function isYoutubeURL(url) {
-	return url.indexOf('https://www.youtube.com/watch') !== -1;
-}
