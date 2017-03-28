@@ -12,13 +12,13 @@
 	  "scripts": ["background.js"]
 	},
 
- //  "content_scripts": [
-	// 	{
-	// 		"matches": ["http://www.youtube.com/*", "https://www.youtube.com/*"],
-	// 		"js": ["main.js"],
-	// 		"all_frames": false
-	// 	}
-	// ],
+  "content_scripts": [
+		{
+			"matches": ["http://www.youtube.com/*", "https://www.youtube.com/*"],
+			"js": ["main.js"],
+			"all_frames": false
+		}
+	],
 
 	"permissions": [
 		"tabs",
