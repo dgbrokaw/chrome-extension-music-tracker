@@ -10,8 +10,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
 function getVideoInformation() {
 	if (!document.querySelector('#eow-title')) console.warn('Video information not present.');
+	var meta_data = {};
 
-	console.log('video title', document.querySelector('#eow-title').innerText);
+	var title = document.querySelector('#eow-title').innerText;
+	console.log('video title', title);
+	meta_data.title = title;
 
 	var meta_items = document.querySelector('.watch-extras-section')
 		.querySelectorAll('.watch-meta-item');
@@ -20,13 +23,26 @@ function getVideoInformation() {
 		  , title = meta_item.querySelector('h4.title').innerText.trim()
 		  , value = meta_item.querySelector('.watch-info-tag-list').innerText.trim();
 
-		if (value === 'Music') console.log('This page is in the \'Music\' category.');
-		if (value === 'People & Blogs') console.log('This page is in the \'People & Blogs\' category, which may be associated with music channels.');
-		if (title === 'Music') console.log('This page contains a music description.');
+		if (value === 'Music') {
+			console.log('This page is in the \'Music\' category.');
+			meta_data.category = value;
+		}
+		if (value === 'People & Blogs') {
+			console.log('This page is in the \'People & Blogs\' category, which may be associated with music channels.');
+			meta_data.category = value;
+		}
+		if (title === 'Music') {
+			console.log('This page contains a music description.');
+			meta_data.music = value;
+		}
 
 		// console.log('meta item:', title, '--', value);
 	}
 
 	var keywords = document.querySelector('meta[name=keywords]').getAttribute('content');
 	console.log('keywords:', keywords.length > 0 ? keywords : 'none');
+
+	chrome.runtime.sendMessage(meta_data, function(response) {
+		console.log(response);
+	});
 }

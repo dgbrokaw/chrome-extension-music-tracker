@@ -7,9 +7,42 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	// the page contains all the information relevant to our purposes.  Once the title
 	// has been loaded, we can try to find other properties of the video.
 	if (changeInfo.title) {
-		console.log('sending message', Date.now());
 		chrome.tabs.sendMessage(tabId, { url: tab.url, title: changeInfo.title }, function(response) {
 			console.log(response);
 		});
 	}
 });
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+  var history_page_url = chrome.extension.getURL("music-history.html");
+  focusOrCreateTab(history_page_url);
+});
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  console.log('data received from content script', request, 'sender', sender);
+  var datum = {meta_data: request};
+  datum.date = new Date();
+  datum.url = sender.url;
+  sendResponse({ message_received: true });
+});
+
+function focusOrCreateTab(url) {
+  chrome.windows.getAll({"populate":true}, function(windows) {
+    var existing_tab = null;
+    for (var i in windows) {
+      var tabs = windows[i].tabs;
+      for (var j in tabs) {
+        var tab = tabs[j];
+        if (tab.url == url) {
+          existing_tab = tab;
+          break;
+        }
+      }
+    }
+    if (existing_tab) {
+      chrome.tabs.update(existing_tab.id, {"selected":true});
+    } else {
+      chrome.tabs.create({"url":url, "selected":true});
+    }
+  });
+}
