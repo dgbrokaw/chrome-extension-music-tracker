@@ -1,5 +1,11 @@
 console.log('Here I am, the background script.');
 
+var db = openDatabase('musictracker', '1.0', 'Music Tracker', 5*1024*1024);
+db.transaction(function(tx) {
+  tx.executeSql('CREATE TABLE IF NOT EXISTS songs (id unique, url, title)');
+  tx.executeSql('CREATE TABLE IF NOT EXISTS listens (date, id)');
+});
+
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	console.log(changeInfo);
 	// There are many "update" events on a single navigation to a youtube watch page.
