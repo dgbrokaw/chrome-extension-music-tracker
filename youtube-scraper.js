@@ -10,14 +10,16 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 function getVideoInformation() {
 	if (!isMusicVideo()) return;
-	if (!document.querySelector('#eow-title')) {
-		console.warn('Video information not present.');
+
+	var video_id_el = document.querySelector('meta[itemprop=videoId]')
+	  , title_el = document.querySelector('#eow-title');
+	if (!video_id_el || !title_el) {
+		console.warn("Music page missing meta data.");
 		return;
 	}
 
-	var video_id = document.querySelector('meta[itemprop=videoId]').getAttribute('content')
-	  , title = document.querySelector('#eow-title').innerText;
-
+	var video_id = video_id_el.getAttribute('content')
+	  , title = title_el.innerText;
 	chrome.runtime.sendMessage({datum: [video_id, title]}, function(response) {
 		console.log(response);
 	});
