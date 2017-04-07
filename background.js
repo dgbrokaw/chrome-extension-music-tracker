@@ -1,11 +1,5 @@
 console.log('Here I am, the background script.');
 
-var db = openDatabase('musictracker', '1.0', 'Music Tracker', 5*1024*1024);
-db.transaction(function(tx) {
-  tx.executeSql('CREATE TABLE IF NOT EXISTS songs (id unique, url, title)');
-  tx.executeSql('CREATE TABLE IF NOT EXISTS listens (date, id)');
-});
-
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	console.log(changeInfo);
 	// There are many "update" events on a single navigation to a youtube watch page.
@@ -24,13 +18,28 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   focusOrCreateTab(history_page_url);
 });
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  console.log('data received from content script', request, 'sender', sender);
-  var datum = {meta_data: request};
-  datum.date = new Date();
-  datum.url = sender.url;
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  console.log('data received from content script', message, 'sender', sender);
+  message.datum.push(sender.url);
+  addListen(message.datum);
   sendResponse({ message_received: true });
 });
+
+var db = openDatabase('musictracker', '1.0', 'Music Tracker', 5*1024*1024);
+db.transaction(function(tx) {
+  tx.executeSql('CREATE TABLE IF NOT EXISTS songs (id unique, title, url)');
+  tx.executeSql('CREATE TABLE IF NOT EXISTS listens (date, id)');
+});
+
+function addListen(datum) {
+  db.transaction(function(tx) {
+    // The id is unique so this won't duplicate songs.
+    tx.executeSql('INSERT INTO songs (id, title, url) VALUES (?, ?, ?)', datum);
+  });
+  db.transaction(function(tx) {
+    tx.executeSql('INSERT INTO listens (date, id) VALUES (?, ?)', [(new Date()).toDateString(), datum[0]]);
+  });
+}
 
 function focusOrCreateTab(url) {
   chrome.windows.getAll({"populate":true}, function(windows) {
