@@ -31,7 +31,7 @@ function selectAllData() {
 
 function countListensByDate() {
 	db.transaction(function(tx) {
-		executeSql(tx, 'SELECT date, COUNT(id) FROM listens GROUP BY date', [], parseDates);
+		executeSql(tx, 'SELECT date, COUNT(id) FROM listens GROUP BY date', [], buildTimeline);
 	});
 }
 
@@ -40,6 +40,25 @@ function parseDates(results) {
 		var date = results.rows.item(i).date;
 		console.log('date', date, 'becomes', d3.isoParse(date));
 	}
+}
+
+function buildTimeline(results) {
+	var data = initData(results);
+
+	var dimensions = { width: 920, height: 460 };
+
+	var svg = d3.select('#timeline-container').append('svg')
+		.attr({ 'width': dimensions.width
+		      , 'height': dimensions.height });
+}
+
+function initData(results) {
+	var data = [];
+	for (var i=0; i<results.rows.length; i++) {
+		var item = results.rows.item(i);
+		data.push({ date: d3.isoParse(item.date), listens: item['COUNT(id)'] });
+	}
+	return data;
 }
 
 function executeSql(tx, sql, vals, success_callback, failure_callback) {
