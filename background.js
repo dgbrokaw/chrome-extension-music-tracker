@@ -1,6 +1,6 @@
 console.log('Here I am, the background script.');
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener(function notifyScriptsOfUpdate(tabId, changeInfo, tab) {
 	console.log(changeInfo);
 	// There are many "update" events on a single navigation to a youtube watch page.
 	// Many of those events contain the "complete" property, but this does not mean
@@ -13,15 +13,15 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 	}
 });
 
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.browserAction.onClicked.addListener(function openMusicHistoryPage(tab) {
   var history_page_url = chrome.extension.getURL("music-history.html");
   focusOrCreateTab(history_page_url);
 });
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function songListenHandler(message, sender, sendResponse) {
   console.log('data received from content script', message, 'sender', sender);
   message.datum.push(sender.url);
-  // addListen(message.datum);
+  // saveListen(message.datum);
   sendResponse({ message_received: true });
 });
 
@@ -31,7 +31,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 //   tx.executeSql('CREATE TABLE IF NOT EXISTS listens (date, id)');
 // });
 
-// function addListen(datum) {
+// function saveListen(datum) {
 //   db.transaction(function(tx) {
 //     // The id is unique so this won't duplicate songs.
 //     tx.executeSql('INSERT INTO songs (id, title, url) VALUES (?, ?, ?)', datum);

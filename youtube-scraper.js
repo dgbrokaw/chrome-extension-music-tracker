@@ -1,8 +1,9 @@
-console.log('Here I am, the content script!', Date.now());
-// Perform on content script load in case the video page was loaded directly.
-setTimeout(getVideoInformation, 1000);
+(function scrapeOnTabOpen() {
+	console.log('Here I am, the content script!', Date.now());
+	setTimeout(getVideoInformation, 1000);
+})();
 
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function tabUpdateHandler(message, sender, sendResponse) {
 	console.log('message received in content script:', message);
 	setTimeout(getVideoInformation, 1000);
 	sendResponse({ message_received: true });
@@ -11,16 +12,16 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 function getVideoInformation() {
 	if (!isMusicVideo()) return;
 
-	var video_id_el = document.querySelector('meta[itemprop=videoId]')
-	  , title_el = document.querySelector('#eow-title');
-	if (!video_id_el || !title_el) {
+	var videoIdElement = document.querySelector('meta[itemprop=videoId]')
+	  , videoTitleElement = document.querySelector('#eow-title');
+	if (!videoIdElement || !videoTitleElement) {
 		console.warn("Music page missing meta data.");
 		return;
 	}
 
-	var video_id = video_id_el.getAttribute('content')
-	  , title = title_el.innerText;
-	chrome.runtime.sendMessage({datum: [video_id, title]}, function(response) {
+	var videoId = videoIdElement.getAttribute('content')
+	  , videoTitle = videoTitleElement.innerText;
+	chrome.runtime.sendMessage({datum: [videoId, videoTitle]}, function(response) {
 		console.log(response);
 	});
 }
